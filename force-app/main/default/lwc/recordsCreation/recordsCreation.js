@@ -15,7 +15,7 @@ const STEPS = [
         fields: [
             createField('Name', 'Bank Name'), createField('Account_Holder_Name__c', 'Account Holder Name'),
             createField('Account_Number__c', 'Account Number'), createField('IFSC__c', 'IFSC'),
-            createField('Branch__c', 'Branch'), createField('Status__c', 'Status', 'picklist')
+            createField('Branch__c', 'Branch')
         ]
     },
     {
@@ -23,8 +23,7 @@ const STEPS = [
         parentLabel: 'Bank',
         fields: [
             createField('Name', 'Card Name'), createField('Card_Number__c', 'Card Number'), createField('Cvv__c', 'Cvv'),
-            createField('Total_Limit__c', 'Total Limit'), createField('Available_Limit__c', 'Available Limit'),
-            createField('Status__c', 'Status', 'picklist')
+            createField('Total_Limit__c', 'Total Limit'), createField('Available_Limit__c', 'Available Limit')
         ]
     },
     {
