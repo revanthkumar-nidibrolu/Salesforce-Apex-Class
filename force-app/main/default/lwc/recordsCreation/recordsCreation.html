@@ -8,72 +8,25 @@
                 <lightning-progress-step key={step.value} label={step.label} value={step.value}></lightning-progress-step>
             </template>
         </lightning-progress-indicator>
-        <div class="slds-m-vertical_large rows-wrapper">
-            <div class="fields-scroll">
-                <template for:each={currentRows} for:item="row">
-                    <div key={row.key} class="fields-row">
-                        <div>
-                            <template lwc:if={hasParent}>
-                                <lightning-combobox 
-                                    data-row-key={row.key} 
-                                    label={parentLabel} 
-                                    options={parentOptions}
-                                    value={row.parentValue} 
-                                    onchange={handleParentChange}
-                                    required>
-                                </lightning-combobox>
-                            </template>
-                            <template lwc:else>
-                                <lightning-input label="Account" value={accountName} readonly></lightning-input>
-                            </template>
-                        </div>
-                        <template for:each={row.fields} for:item="field">
-                            <div key={field.apiName}>
-                                <template lwc:if={field.isPicklist}>
-                                    <lightning-combobox 
-                                        data-row-key={row.key} 
-                                        data-field={field.apiName} 
-                                        label={field.label}
-                                        options={field.options} 
-                                        value={field.value} 
-                                        required={field.required}
-                                        onchange={handleChange}>
-                                    </lightning-combobox>
-                                </template>
-                                <template lwc:else>
-                                    <lightning-input 
-                                        data-row-key={row.key} 
-                                        data-field={field.apiName} 
-                                        label={field.label}
-                                        type={field.type} 
-                                        value={field.value} 
-                                        required={field.required}
-                                        onchange={handleChange}>
-                                    </lightning-input>
-                                </template>
-                            </div>
-                        </template>
-                    </div>
-                </template>
-            </div>
-            <div class="actions-column">
-                <template for:each={currentRows} for:item="row">
-                    <div key={row.key} class="row-actions">
-                        <lightning-button-icon 
-                            icon-name="utility:add" 
-                            data-row-key={row.key} 
-                            onclick={handleAddRow}
-                            class="slds-m-right_xx-small">
-                        </lightning-button-icon>
-                        <lightning-button-icon 
-                            icon-name="utility:delete" 
-                            data-row-key={row.key}
-                            disabled={row.disableRemove} 
-                            onclick={handleRemoveRow}>
-                        </lightning-button-icon>
-                    </div>
-                </template>
-            </div>
+        <div class="slds-m-vertical_large">
+            <template lwc:if={hasParent}>
+                <lightning-input variant="label-inline" label={parentLabel} value={parentName} readonly></lightning-input>
+            </template>
+            <template lwc:else>
+                <lightning-input variant="label-inline" label="Account" value={accountName} readonly></lightning-input>
+            </template>
+            <template for:each={currentFields} for:item="field">
+                <lightning-input
+                    key={field.apiName}
+                    variant="label-inline"
+                    data-field={field.apiName}
+                    label={field.label}
+                    type={field.type}
+                    value={field.value}
+                    required={field.required}
+                    onchange={handleChange}>
+                </lightning-input>
+            </template>
         </div>
         <div class="slds-grid slds-grid_align-center">
             <lightning-button label="Cancel" onclick={handleCancel} class="slds-m-right_x-small"></lightning-button>
