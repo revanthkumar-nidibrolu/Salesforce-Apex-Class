@@ -2,6 +2,9 @@ import { LightningElement, api, wire } from 'lwc';
 import { CloseActionScreenEvent } from 'lightning/actions';
 import { createRecord, getRecord, getFieldValue } from 'lightning/uiRecordApi';
 import { showSuccessToast, showErrorToast } from 'c/toastClass';
+import { getObjectInfo, getPicklistValues } from 'lightning/uiObjectInfoApi';
+import TRANSACTION_OBJECT from '@salesforce/schema/Credit_Card_Transaction__c';
+import PAYMENT_STATUS from '@salesforce/schema/Credit_Card_Transaction__c.Payment_Status__c';
 import ACCOUNT_NAME from '@salesforce/schema/Account.Name';
 
 const STEPS = [
@@ -42,11 +45,12 @@ const STEPS = [
         parentStep: 'card',
         parentLabel: 'Card',
         multiple: true,
+        copyFromParent: ['Name', 'Card_Number__c'],
         fields: [
             { apiName: 'Name', label: 'Card Name', required: true },
             { apiName: 'Card_Number__c', label: 'Card Number', required: true },
             { apiName: 'Amount__c', label: 'Amount', type: 'number', required: true },
-            { apiName: 'Payment_Status__c', label: 'Payment Status', required: true },
+            { apiName: 'Payment_Status__c', label: 'Payment Status', type: 'picklist', required: true },
             { apiName: 'Transaction_Date__c', label: 'Transaction Date', type: 'date', required: true }
         ]
     }
@@ -62,6 +66,23 @@ export default class RecordsCreation extends LightningElement {
     rowCounter = 0;
     isSaving = false;
     rows = this.buildInitialRows();
+    picklistOptions = {};
+
+    @wire(getObjectInfo, { objectApiName: TRANSACTION_OBJECT })
+    transactionInfo;
+
+    @wire(getPicklistValues, {
+        recordTypeId: '$transactionInfo.data.defaultRecordTypeId',
+        fieldApiName: PAYMENT_STATUS
+    })
+    wiredPaymentStatus({ data }) {
+        if (data) {
+            this.picklistOptions = { ...this.picklistOptions, Payment_Status__c: data.values };
+        }
+    }
+
+    @wire(getRecord, { recordId: '$recordId', fields: [ACCOUNT_NAME] })
+    account;
 
     buildInitialRows() {
         const rows = {};
@@ -70,9 +91,6 @@ export default class RecordsCreation extends LightningElement {
         });
         return rows;
     }
-
-    @wire(getRecord, { recordId: '$recordId', fields: [ACCOUNT_NAME] })
-    account;
 
     get accountName() {
         return getFieldValue(this.account.data, ACCOUNT_NAME);
@@ -113,7 +131,7 @@ export default class RecordsCreation extends LightningElement {
     get parentOptions() {
         const cfg = this.currentStepConfig;
         if (!cfg.parentStep) return [];
-        return this.rows[cfg.parentStep].map((r, i) => ({
+        return this.rows[cfg.parentStep].map((r) => ({
             label: `${r.values.Name}`,
             value: String(r.key)
         }));
@@ -126,10 +144,10 @@ export default class RecordsCreation extends LightningElement {
             parentValue: row.parentKey ? String(row.parentKey) : '',
             disableRemove: stepRows.length == 1,
             fields: this.currentStepConfig.fields.map((f) => ({
-                ...f, 
+                ...f,
                 isPicklist: f.type == 'picklist',
                 options: f.type == 'picklist' ? this.picklistOptions[f.apiName] || [] : [],
-                value: row.values[f.name] ?? ''
+                value: row.values[f.apiName] ?? ''
             }))
         }));
     }
@@ -154,6 +172,17 @@ export default class RecordsCreation extends LightningElement {
         this.rows = { ...this.rows, [this.currentStep]: newRows };
     }
 
+    withParentValues(cfg, row, parentRows) {
+        if (!cfg.copyFromParent) return row;
+        const parent = parentRows.find((p) => p.key == row.parentKey);
+        if (!parent) return row;
+        const values = { ...row.values };
+        cfg.copyFromParent.forEach((apiName) => {
+            values[apiName] = parent.values[apiName];
+        });
+        return { ...row, values };
+    }
+
     handleChange(event) {
         const rowKey = Number(event.target.dataset.rowKey);
         const field = event.target.dataset.field;
@@ -167,8 +196,12 @@ export default class RecordsCreation extends LightningElement {
     handleParentChange(event) {
         const rowKey = Number(event.target.dataset.rowKey);
         const parentKey = Number(event.detail.value);
+        const cfg = this.currentStepConfig;
+        const parentRows = this.rows[cfg.parentStep];
         this.setCurrentRows(
-            this.rows[this.currentStep].map((row) => (row.key == rowKey ? { ...row, parentKey } : row))
+            this.rows[this.currentStep].map((row) =>
+                row.key == rowKey ? this.withParentValues(cfg, { ...row, parentKey }, parentRows) : row
+            )
         );
     }
 
@@ -195,18 +228,21 @@ export default class RecordsCreation extends LightningElement {
     syncParents(stepValue) {
         const cfg = this.steps.find((s) => s.value == stepValue);
         if (!cfg.parentStep) return;
-        const parentKeys = this.rows[cfg.parentStep].map((r) => r.key);
+        const parentRows = this.rows[cfg.parentStep];
+        const parentKeys = parentRows.map((r) => r.key);
         this.rows = {
             ...this.rows,
-            [stepValue]: this.rows[stepValue].map((r) =>
-                parentKeys.includes(r.parentKey) ? r : { ...r, parentKey: parentKeys[0] }
-            )
+            [stepValue]: this.rows[stepValue].map((r) => {
+                const parentKey = parentKeys.includes(r.parentKey) ? r.parentKey : parentKeys[0];
+                return this.withParentValues(cfg, { ...r, parentKey }, parentRows);
+            })
         };
     }
 
     isStepValid() {
         return [...this.template.querySelectorAll('lightning-input, lightning-combobox')].reduce(
-            (ok, input) => input.reportValidity() && ok, true
+            (ok, input) => input.reportValidity() && ok,
+            true
         );
     }
 
@@ -245,7 +281,9 @@ export default class RecordsCreation extends LightningElement {
                             if (v == undefined || v == '') return;
                             fields[f.apiName] = f.type == 'number' ? Number(v) : v;
                         });
-                        fields[step.parentField] = step.parentStep ? idMap[step.parentStep][row.parentKey] : this.recordId;
+                        fields[step.parentField] = step.parentStep
+                            ? idMap[step.parentStep][row.parentKey]
+                            : this.recordId;
                         const rec = await createRecord({ apiName: step.objectApiName, fields });
                         idMap[step.value][row.key] = rec.id;
                     })
@@ -254,7 +292,7 @@ export default class RecordsCreation extends LightningElement {
             showSuccessToast(this, 'Compound action completed successfully!');
             this.dispatchEvent(new CloseActionScreenEvent());
         } catch (event) {
-            showErrorToast(this, event.body?.message)
+            showErrorToast(this, event.body?.message);
         } finally {
             this.isSaving = false;
         }
