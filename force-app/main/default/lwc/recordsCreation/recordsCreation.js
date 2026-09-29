@@ -1,298 +1,158 @@
 import { LightningElement, api, wire } from 'lwc';
 import { CloseActionScreenEvent } from 'lightning/actions';
 import { createRecord, getRecord, getFieldValue } from 'lightning/uiRecordApi';
-import { showSuccessToast, showErrorToast } from 'c/toastClass';
 import { getObjectInfo, getPicklistValues } from 'lightning/uiObjectInfoApi';
+import { showSuccessToast, showErrorToast } from 'c/toastClass';
 import TRANSACTION_OBJECT from '@salesforce/schema/Credit_Card_Transaction__c';
 import PAYMENT_STATUS from '@salesforce/schema/Credit_Card_Transaction__c.Payment_Status__c';
 import ACCOUNT_NAME from '@salesforce/schema/Account.Name';
 
+const f = (apiName, label, type) => ({ apiName, label, type, required: true });
+
 const STEPS = [
     {
-        value: 'bank',
-        label: 'Bank',
-        objectApiName: 'Bank__c',
-        parentField: 'Account__c',
-        multiple: true,
+        value: 'bank', label: 'Bank', object: 'Bank__c', parentField: 'Account__c',
         fields: [
-            { apiName: 'Name', label: 'Bank Name', required: true },
-            { apiName: 'Account_Holder_Name__c', label: 'Account Holder Name', required: true },
-            { apiName: 'Account_Number__c', label: 'Account Number', required: true },
-            { apiName: 'IFSC__c', label: 'IFSC', required: true },
-            { apiName: 'Branch__c', label: 'Branch', required: true }
-        ]
+            f('Name', 'Bank Name'), f('Account_Holder_Name__c', 'Account Holder Name'),
+            f('Account_Number__c', 'Account Number'), f('IFSC__c', 'IFSC'), f('Branch__c', 'Branch')]
     },
     {
-        value: 'card',
-        label: 'Credit Card',
-        objectApiName: 'Credit_Card__c',
-        parentField: 'Bank__c',
-        parentStep: 'bank',
+        value: 'card', label: 'Credit Card', object: 'Credit_Card__c', parentField: 'Bank__c', parentStep: 'bank', 
         parentLabel: 'Bank',
-        multiple: true,
         fields: [
-            { apiName: 'Name', label: 'Card Name', required: true },
-            { apiName: 'Card_Number__c', label: 'Card Number', required: true },
-            { apiName: 'Total_Limit__c', label: 'Total Limit', required: true },
-            { apiName: 'Available_Limit__c', label: 'Available Limit', required: true }
-        ]
+            f('Name', 'Card Name'), f('Card_Number__c', 'Card Number'),
+            f('Total_Limit__c', 'Total Limit'), f('Available_Limit__c', 'Available Limit')]
     },
     {
-        value: 'transaction',
-        label: 'Transaction',
-        objectApiName: 'Credit_Card_Transaction__c',
-        parentField: 'Credit_Card__c',
-        parentStep: 'card',
-        parentLabel: 'Card',
-        multiple: true,
-        copyFromParent: ['Name', 'Card_Number__c'],
+        value: 'transaction', label: 'Transaction', object: 'Credit_Card_Transaction__c', parentField: 'Credit_Card__c',
+        parentStep: 'card', parentLabel: 'Card', copyFromParent: ['Card_Number__c'],
         fields: [
-            { apiName: 'Name', label: 'Card Name', required: true },
-            { apiName: 'Card_Number__c', label: 'Card Number', required: true },
-            { apiName: 'Amount__c', label: 'Amount', type: 'number', required: true },
-            { apiName: 'Payment_Status__c', label: 'Payment Status', type: 'picklist', required: true },
-            { apiName: 'Transaction_Date__c', label: 'Transaction Date', type: 'date', required: true }
-        ]
+            f('Name', 'Card Name'), f('Card_Number__c', 'Card Number'), f('Amount__c', 'Amount', 'number'),
+            f('Payment_Status__c', 'Payment Status', 'picklist'), f('Transaction_Date__c', 'Transaction Date', 'date')]
     }
 ];
-const FIELDS_VISIBLE = 5;
-const GAP_REM = 0.75;
 
 export default class RecordsCreation extends LightningElement {
     @api recordId;
 
     steps = STEPS;
     currentStep = STEPS[0].value;
-    rowCounter = 0;
     isSaving = false;
-    rows = this.buildInitialRows();
-    picklistOptions = {};
+    counter = 0;
+    rows = Object.fromEntries(STEPS.map((s) => [s.value, [this.newRow()]]));
 
-    @wire(getObjectInfo, { objectApiName: TRANSACTION_OBJECT })
-    transactionInfo;
+    @wire(getRecord, { recordId: '$recordId', fields: [ACCOUNT_NAME] }) account;
+    @wire(getObjectInfo, { objectApiName: TRANSACTION_OBJECT }) info;
+    @wire(getPicklistValues, { recordTypeId: '$info.data.defaultRecordTypeId', fieldApiName: PAYMENT_STATUS }) status;
 
-    @wire(getPicklistValues, {
-        recordTypeId: '$transactionInfo.data.defaultRecordTypeId',
-        fieldApiName: PAYMENT_STATUS
-    })
-    wiredPaymentStatus({ data }) {
-        if (data) {
-            this.picklistOptions = { ...this.picklistOptions, Payment_Status__c: data.values };
-        }
-    }
-
-    @wire(getRecord, { recordId: '$recordId', fields: [ACCOUNT_NAME] })
-    account;
-
-    buildInitialRows() {
-        const rows = {};
-        STEPS.forEach((s) => {
-            rows[s.value] = [{ key: ++this.rowCounter, parentKey: null, values: {} }];
-        });
-        return rows;
-    }
-
-    get accountName() {
-        return getFieldValue(this.account.data, ACCOUNT_NAME);
-    }
-
-    get currentIndex() {
-        return this.steps.findIndex((s) => s.value == this.currentStep);
-    }
-
-    get currentStepConfig() {
-        return this.steps[this.currentIndex];
-    }
-
-    get isMultiple() {
-        return this.currentStepConfig.multiple;
-    }
-
-    get isFirstStep() {
-        return this.currentIndex == 0;
-    }
-
-    get showBack() {
-        return !this.isFirstStep;
-    }
-
-    get isLastStep() {
-        return this.currentIndex == this.steps.length - 1;
-    }
-
-    get hasParent() {
-        return !!this.currentStepConfig.parentStep;
-    }
-
-    get parentLabel() {
-        return this.currentStepConfig.parentLabel;
-    }
+    get accountName() { return getFieldValue(this.account.data, ACCOUNT_NAME); }
+    get index() { return this.steps.findIndex((s) => s.value == this.currentStep); }
+    get cfg() { return this.steps[this.index]; }
+    get hasParent() { return !!this.cfg.parentStep; }
+    get parentLabel() { return this.cfg.parentLabel; }
+    get showBack() { return this.index > 0; }
+    get isLastStep() { return this.index == this.steps.length - 1; }
 
     get parentOptions() {
-        const cfg = this.currentStepConfig;
-        if (!cfg.parentStep) return [];
-        return this.rows[cfg.parentStep].map((r) => ({
-            label: `${r.values.Name}`,
-            value: String(r.key)
-        }));
+        return (this.rows[this.cfg.parentStep] || []).map((r) => ({ label: r.values.Name, value: String(r.key) }));
     }
 
     get currentRows() {
-        const stepRows = this.rows[this.currentStep];
-        return stepRows.map((row) => ({
-            key: row.key,
-            parentValue: row.parentKey ? String(row.parentKey) : '',
-            disableRemove: stepRows.length == 1,
-            fields: this.currentStepConfig.fields.map((f) => ({
-                ...f,
-                isPicklist: f.type == 'picklist',
-                options: f.type == 'picklist' ? this.picklistOptions[f.apiName] || [] : [],
-                value: row.values[f.apiName] ?? ''
+        const rows = this.rows[this.currentStep];
+        return rows.map((r) => ({
+            key: r.key,
+            parentValue: String(r.parentKey ?? ''),
+            disableRemove: rows.length === 1,
+            fields: this.cfg.fields.map((fl) => ({
+                ...fl,
+                isPicklist: fl.type === 'picklist',
+                options: this.status?.data?.values || [],
+                value: r.values[fl.apiName] ?? ''
             }))
         }));
     }
 
-    get gridStyle() {
-        const totalGaps = (FIELDS_VISIBLE - 1) * GAP_REM;
-        return (
-            'display:grid;grid-auto-flow:column;' +
-            `grid-auto-columns:calc((100% - ${totalGaps}rem) / ${FIELDS_VISIBLE});` +
-            `column-gap:${GAP_REM}rem;align-items:end;overflow-x:auto;min-width:0;padding-bottom:0.25rem;`
-        );
+    newRow(parentKey = null, values = {}) {
+        return { key: ++this.counter, parentKey, values };
     }
 
-    handleScroll(event) {
-        const left = event.currentTarget.scrollLeft;
-        this.template.querySelectorAll('.fields-scroll').forEach((el) => {
-            if (el.scrollLeft != left) el.scrollLeft = left;
-        });
+    setRows(fn, step = this.currentStep) {
+        this.rows = { ...this.rows, [step]: fn(this.rows[step]) };
     }
 
-    setCurrentRows(newRows) {
-        this.rows = { ...this.rows, [this.currentStep]: newRows };
+    updateRow(key, fn) {
+        this.setRows((rs) => rs.map((r) => (r.key === key ? fn(r) : r)));
     }
 
-    withParentValues(cfg, row, parentRows) {
-        if (!cfg.copyFromParent) return row;
-        const parent = parentRows.find((p) => p.key == row.parentKey);
-        if (!parent) return row;
+    link(step, row, parentKey) {
+        const parent = this.rows[step.parentStep].find((p) => p.key == parentKey);
         const values = { ...row.values };
-        cfg.copyFromParent.forEach((apiName) => {
-            values[apiName] = parent.values[apiName];
+        (step.copyFromParent || []).forEach((k) => parent && (values[k] = parent.values[k]));
+        return { ...row, parentKey, values };
+    }
+
+    handleChange(e) {
+        const { rowKey, field } = e.target.dataset;
+        this.updateRow(+rowKey, (r) => ({ ...r, values: { ...r.values, [field]: e.target.value } }));
+    }
+
+    handleParentChange(e) {
+        this.updateRow(+e.target.dataset.rowKey, (r) => this.link(this.cfg, r, +e.detail.value));
+    }
+
+    handleAddRow(e) {
+        const key = +e.currentTarget.dataset.rowKey;
+        this.setRows((rs) => {
+            const i = rs.findIndex((r) => r.key == key);
+            return [...rs.slice(0, i + 1), this.newRow(rs[i].parentKey, { ...rs[i].values }), ...rs.slice(i + 1)];
         });
-        return { ...row, values };
     }
 
-    handleChange(event) {
-        const rowKey = Number(event.target.dataset.rowKey);
-        const field = event.target.dataset.field;
-        this.setCurrentRows(
-            this.rows[this.currentStep].map((row) =>
-                row.key == rowKey ? { ...row, values: { ...row.values, [field]: event.target.value } } : row
-            )
-        );
+    handleRemoveRow(e) {
+        const key = +e.currentTarget.dataset.rowKey;
+        this.setRows((rs) => rs.filter((r) => r.key !== key));
     }
 
-    handleParentChange(event) {
-        const rowKey = Number(event.target.dataset.rowKey);
-        const parentKey = Number(event.detail.value);
-        const cfg = this.currentStepConfig;
-        const parentRows = this.rows[cfg.parentStep];
-        this.setCurrentRows(
-            this.rows[this.currentStep].map((row) =>
-                row.key == rowKey ? this.withParentValues(cfg, { ...row, parentKey }, parentRows) : row
-            )
-        );
+    isValid() {
+        return [...this.template.querySelectorAll('lightning-input, lightning-combobox')]
+            .reduce((ok, el) => el.reportValidity() && ok, true);
     }
 
-    handleAddRow(event) {
-        const rowKey = Number(event.currentTarget.dataset.rowKey);
-        const stepRows = [...this.rows[this.currentStep]];
-        const index = stepRows.findIndex((r) => r.key == rowKey);
-        stepRows.splice(index + 1, 0, {
-            key: ++this.rowCounter,
-            parentKey: stepRows[index].parentKey,
-            values: { ...stepRows[index].values }
-        });
-        this.setCurrentRows(stepRows);
-    }
-
-    handleRemoveRow(event) {
-        const rowKey = Number(event.currentTarget.dataset.rowKey);
-        const stepRows = this.rows[this.currentStep];
-        if (stepRows.length > 1) {
-            this.setCurrentRows(stepRows.filter((r) => r.key != rowKey));
+    move(delta) {
+        const step = this.steps[this.index + delta];
+        if (step.parentStep) {
+            const keys = this.rows[step.parentStep].map((r) => r.key);
+            this.setRows(
+                (rs) => rs.map((r) => this.link(step, r, keys.includes(r.parentKey) ? r.parentKey : keys[0])),
+                step.value
+            );
         }
+        this.currentStep = step.value;
     }
 
-    syncParents(stepValue) {
-        const cfg = this.steps.find((s) => s.value == stepValue);
-        if (!cfg.parentStep) return;
-        const parentRows = this.rows[cfg.parentStep];
-        const parentKeys = parentRows.map((r) => r.key);
-        this.rows = {
-            ...this.rows,
-            [stepValue]: this.rows[stepValue].map((r) => {
-                const parentKey = parentKeys.includes(r.parentKey) ? r.parentKey : parentKeys[0];
-                return this.withParentValues(cfg, { ...r, parentKey }, parentRows);
-            })
-        };
-    }
-
-    isStepValid() {
-        return [...this.template.querySelectorAll('lightning-input, lightning-combobox')].reduce(
-            (ok, input) => input.reportValidity() && ok,
-            true
-        );
-    }
-
-    handleNext() {
-        if (this.isStepValid() && !this.isLastStep) {
-            const next = this.steps[this.currentIndex + 1].value;
-            this.syncParents(next);
-            this.currentStep = next;
-        }
-    }
-
-    handleBack() {
-        if (!this.isFirstStep) {
-            const prev = this.steps[this.currentIndex - 1].value;
-            this.syncParents(prev);
-            this.currentStep = prev;
-        }
-    }
-
-    handleCancel() {
-        this.dispatchEvent(new CloseActionScreenEvent());
-    }
+    handleNext() { if (this.isValid()) this.move(1); }
+    handleBack() { this.move(-1); }
+    handleCancel() { this.dispatchEvent(new CloseActionScreenEvent()); }
 
     async handleFinish() {
-        if (!this.isStepValid()) return;
+        if (!this.isValid()) return;
         this.isSaving = true;
+        const ids = {};
         try {
-            const idMap = {};
-            for (const step of this.steps) {
-                idMap[step.value] = {};
-                await Promise.all(
-                    this.rows[step.value].map(async (row) => {
-                        const fields = {};
-                        step.fields.forEach((f) => {
-                            const v = row.values[f.apiName];
-                            if (v == undefined || v == '') return;
-                            fields[f.apiName] = f.type == 'number' ? Number(v) : v;
-                        });
-                        fields[step.parentField] = step.parentStep
-                            ? idMap[step.parentStep][row.parentKey]
-                            : this.recordId;
-                        const rec = await createRecord({ apiName: step.objectApiName, fields });
-                        idMap[step.value][row.key] = rec.id;
-                    })
-                );
+            for (const s of this.steps) {
+                await Promise.all(this.rows[s.value].map(async (row) => {
+                    const fields = { [s.parentField]: s.parentStep ? ids[row.parentKey] : this.recordId };
+                    s.fields.forEach(({ apiName, type }) => {
+                        const v = row.values[apiName];
+                        if (v !== undefined && v !== '') fields[apiName] = type === 'number' ? Number(v) : v;
+                    });
+                    ids[row.key] = (await createRecord({ apiName: s.object, fields })).id;
+                }));
             }
             showSuccessToast(this, 'Compound action completed successfully!');
             this.dispatchEvent(new CloseActionScreenEvent());
-        } catch (event) {
-            showErrorToast(this, event.body?.message);
+        } catch (error) {
+            showErrorToast(this, error.body?.message || error.message);
         } finally {
             this.isSaving = false;
         }
