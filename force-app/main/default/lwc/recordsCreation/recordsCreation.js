@@ -7,28 +7,34 @@ import TRANSACTION_OBJECT from '@salesforce/schema/Credit_Card_Transaction__c';
 import PAYMENT_STATUS from '@salesforce/schema/Credit_Card_Transaction__c.Payment_Status__c';
 import ACCOUNT_NAME from '@salesforce/schema/Account.Name';
 
-const f = (apiName, label, type) => ({ apiName, label, type, required: true });
+const createField = (apiName, label, type) => ({ apiName, label, type, required: true });
 
 const STEPS = [
     {
         value: 'bank', label: 'Bank', object: 'Bank__c', parentField: 'Account__c',
         fields: [
-            f('Name', 'Bank Name'), f('Account_Holder_Name__c', 'Account Holder Name'),
-            f('Account_Number__c', 'Account Number'), f('IFSC__c', 'IFSC'), f('Branch__c', 'Branch')]
+            createField('Name', 'Bank Name'), createField('Account_Holder_Name__c', 'Account Holder Name'),
+            createField('Account_Number__c', 'Account Number'), createField('IFSC__c', 'IFSC'),
+            createField('Branch__c', 'Branch'), createField('Status__c', 'Status', 'picklist')
+        ]
     },
     {
-        value: 'card', label: 'Credit Card', object: 'Credit_Card__c', parentField: 'Bank__c', parentStep: 'bank', 
+        value: 'card', label: 'Credit Card', object: 'Credit_Card__c', parentField: 'Bank__c',parentStep: 'bank', 
         parentLabel: 'Bank',
         fields: [
-            f('Name', 'Card Name'), f('Card_Number__c', 'Card Number'),
-            f('Total_Limit__c', 'Total Limit'), f('Available_Limit__c', 'Available Limit')]
+            createField('Name', 'Card Name'), createField('Card_Number__c', 'Card Number'), createField('Cvv__c', 'Cvv'),
+            createField('Total_Limit__c', 'Total Limit'), createField('Available_Limit__c', 'Available Limit'),
+            createField('Status__c', 'Status', 'picklist')
+        ]
     },
     {
-        value: 'transaction', label: 'Transaction', object: 'Credit_Card_Transaction__c', parentField: 'Credit_Card__c',
-        parentStep: 'card', parentLabel: 'Card', copyFromParent: ['Card_Number__c'],
+        value: 'transaction', label: 'Transaction', object: 'Credit_Card_Transaction__c',
+        parentField: 'Credit_Card__c', parentStep: 'card', parentLabel: 'Card', copyFromParent: ['Card_Number__c'],
         fields: [
-            f('Name', 'Card Name'), f('Card_Number__c', 'Card Number'), f('Amount__c', 'Amount', 'number'),
-            f('Payment_Status__c', 'Payment Status', 'picklist'), f('Transaction_Date__c', 'Transaction Date', 'date')]
+            createField('Name', 'Card Name'), createField('Card_Number__c', 'Card Number'),
+            createField('Amount__c', 'Amount', 'number'), createField('Payment_Status__c', 'Payment Status', 'picklist'),
+            createField('Transaction_Date__c', 'Transaction Date', 'date')
+        ]
     }
 ];
 
@@ -38,96 +44,118 @@ export default class RecordsCreation extends LightningElement {
     steps = STEPS;
     currentStep = STEPS[0].value;
     isSaving = false;
-    counter = 0;
-    rows = Object.fromEntries(STEPS.map((s) => [s.value, [this.newRow()]]));
+    rowCounter = 0;
+    rows = Object.fromEntries(STEPS.map((step) => [step.value, [this.newRow()]]));
 
     @wire(getRecord, { recordId: '$recordId', fields: [ACCOUNT_NAME] }) account;
-    @wire(getObjectInfo, { objectApiName: TRANSACTION_OBJECT }) info;
-    @wire(getPicklistValues, { recordTypeId: '$info.data.defaultRecordTypeId', fieldApiName: PAYMENT_STATUS }) status;
+    @wire(getObjectInfo, { objectApiName: TRANSACTION_OBJECT }) transactionInfo;
+    @wire(getPicklistValues, {
+        recordTypeId: '$transactionInfo.data.defaultRecordTypeId',
+        fieldApiName: PAYMENT_STATUS
+    }) paymentStatusPicklist;
 
     get accountName() { return getFieldValue(this.account.data, ACCOUNT_NAME); }
-    get index() { return this.steps.findIndex((s) => s.value == this.currentStep); }
-    get cfg() { return this.steps[this.index]; }
-    get hasParent() { return !!this.cfg.parentStep; }
-    get parentLabel() { return this.cfg.parentLabel; }
-    get showBack() { return this.index > 0; }
-    get isLastStep() { return this.index == this.steps.length - 1; }
+    get currentIndex() { return this.steps.findIndex((step) => step.value == this.currentStep); }
+    get currentStepConfig() { return this.steps[this.currentIndex]; }
+    get hasParent() { return !!this.currentStepConfig.parentStep; }
+    get parentLabel() { return this.currentStepConfig.parentLabel; }
+    get showBack() { return this.currentIndex > 0; }
+    get isLastStep() { return this.currentIndex == this.steps.length - 1; }
 
     get parentOptions() {
-        return (this.rows[this.cfg.parentStep] || []).map((r) => ({ label: r.values.Name, value: String(r.key) }));
+        const parentRows = this.rows[this.currentStepConfig.parentStep] || [];
+        return parentRows.map((parentRow) => ({
+            label: parentRow.values.Name,
+            value: String(parentRow.key)
+        }));
     }
 
     get currentRows() {
-        const rows = this.rows[this.currentStep];
-        return rows.map((r) => ({
-            key: r.key,
-            parentValue: String(r.parentKey ?? ''),
-            disableRemove: rows.length === 1,
-            fields: this.cfg.fields.map((fl) => ({
-                ...fl,
-                isPicklist: fl.type === 'picklist',
-                options: this.status?.data?.values || [],
-                value: r.values[fl.apiName] ?? ''
+        const stepRows = this.rows[this.currentStep];
+        return stepRows.map((row) => ({
+            key: row.key,
+            parentValue: String(row.parentKey ?? ''),
+            disableRemove: stepRows.length == 1,
+            fields: this.currentStepConfig.fields.map((field) => ({
+                ...field,
+                isPicklist: field.type == 'picklist',
+                options: this.paymentStatusPicklist?.data?.values || [],
+                value: row.values[field.apiName] ?? ''
             }))
         }));
     }
 
     newRow(parentKey = null, values = {}) {
-        return { key: ++this.counter, parentKey, values };
+        return { key: ++this.rowCounter, parentKey, values };
     }
 
-    setRows(fn, step = this.currentStep) {
-        this.rows = { ...this.rows, [step]: fn(this.rows[step]) };
+    setRows(updateStepRows, stepValue = this.currentStep) {
+        this.rows = { ...this.rows, [stepValue]: updateStepRows(this.rows[stepValue]) };
     }
 
-    updateRow(key, fn) {
-        this.setRows((rs) => rs.map((r) => (r.key === key ? fn(r) : r)));
+    updateRow(rowKey, updateRowFn) {
+        this.setRows((stepRows) => stepRows.map((row) => (row.key == rowKey ? updateRowFn(row) : row)));
     }
 
-    link(step, row, parentKey) {
-        const parent = this.rows[step.parentStep].find((p) => p.key == parentKey);
+    linkToParent(step, row, parentKey) {
+        const parentRow = this.rows[step.parentStep].find((candidate) => candidate.key == parentKey);
         const values = { ...row.values };
-        (step.copyFromParent || []).forEach((k) => parent && (values[k] = parent.values[k]));
+        (step.copyFromParent || []).forEach((fieldApiName) => {
+            if (parentRow) values[fieldApiName] = parentRow.values[fieldApiName];
+        });
         return { ...row, parentKey, values };
     }
 
-    handleChange(e) {
-        const { rowKey, field } = e.target.dataset;
-        this.updateRow(+rowKey, (r) => ({ ...r, values: { ...r.values, [field]: e.target.value } }));
+    handleChange(event) {
+        const { rowKey, field: fieldApiName } = event.target.dataset;
+        this.updateRow(Number(rowKey), (row) => ({
+            ...row,
+            values: { ...row.values, [fieldApiName]: event.target.value }
+        }));
     }
 
-    handleParentChange(e) {
-        this.updateRow(+e.target.dataset.rowKey, (r) => this.link(this.cfg, r, +e.detail.value));
+    handleParentChange(event) {
+        const rowKey = Number(event.target.dataset.rowKey);
+        const parentKey = Number(event.detail.value);
+        this.updateRow(rowKey, (row) => this.linkToParent(this.currentStepConfig, row, parentKey));
     }
 
-    handleAddRow(e) {
-        const key = +e.currentTarget.dataset.rowKey;
-        this.setRows((rs) => {
-            const i = rs.findIndex((r) => r.key == key);
-            return [...rs.slice(0, i + 1), this.newRow(rs[i].parentKey, { ...rs[i].values }), ...rs.slice(i + 1)];
+    handleAddRow(event) {
+        const rowKey = Number(event.currentTarget.dataset.rowKey);
+        this.setRows((stepRows) => {
+            const rowIndex = stepRows.findIndex((row) => row.key == rowKey);
+            const sourceRow = stepRows[rowIndex];
+            const copiedRow = this.newRow(sourceRow.parentKey, { ...sourceRow.values });
+            return [...stepRows.slice(0, rowIndex + 1), copiedRow, ...stepRows.slice(rowIndex + 1)];
         });
     }
 
-    handleRemoveRow(e) {
-        const key = +e.currentTarget.dataset.rowKey;
-        this.setRows((rs) => rs.filter((r) => r.key !== key));
+    handleRemoveRow(event) {
+        const rowKey = Number(event.currentTarget.dataset.rowKey);
+        this.setRows((stepRows) => stepRows.filter((row) => row.key != rowKey));
     }
 
     isValid() {
-        return [...this.template.querySelectorAll('lightning-input, lightning-combobox')]
-            .reduce((ok, el) => el.reportValidity() && ok, true);
+        const inputElements = this.template.querySelectorAll('lightning-input, lightning-combobox');
+        return [...inputElements].reduce(
+            (allValid, inputElement) => inputElement.reportValidity() && allValid,
+            true
+        );
     }
 
-    move(delta) {
-        const step = this.steps[this.index + delta];
-        if (step.parentStep) {
-            const keys = this.rows[step.parentStep].map((r) => r.key);
+    move(direction) {
+        const targetStep = this.steps[this.currentIndex + direction];
+        if (targetStep.parentStep) {
+            const parentKeys = this.rows[targetStep.parentStep].map((parentRow) => parentRow.key);
             this.setRows(
-                (rs) => rs.map((r) => this.link(step, r, keys.includes(r.parentKey) ? r.parentKey : keys[0])),
-                step.value
+                (stepRows) => stepRows.map((row) => {
+                    const parentKey = parentKeys.includes(row.parentKey) ? row.parentKey : parentKeys[0];
+                    return this.linkToParent(targetStep, row, parentKey);
+                }),
+                targetStep.value
             );
         }
-        this.currentStep = step.value;
+        this.currentStep = targetStep.value;
     }
 
     handleNext() { if (this.isValid()) this.move(1); }
@@ -137,16 +165,21 @@ export default class RecordsCreation extends LightningElement {
     async handleFinish() {
         if (!this.isValid()) return;
         this.isSaving = true;
-        const ids = {};
+        const createdRecordIds = {};
         try {
-            for (const s of this.steps) {
-                await Promise.all(this.rows[s.value].map(async (row) => {
-                    const fields = { [s.parentField]: s.parentStep ? ids[row.parentKey] : this.recordId };
-                    s.fields.forEach(({ apiName, type }) => {
-                        const v = row.values[apiName];
-                        if (v !== undefined && v !== '') fields[apiName] = type === 'number' ? Number(v) : v;
+            for (const step of this.steps) {
+                await Promise.all(this.rows[step.value].map(async (row) => {
+                    const recordFields = {
+                        [step.parentField]: step.parentStep ? createdRecordIds[row.parentKey] : this.recordId
+                    };
+                    step.fields.forEach(({ apiName, type }) => {
+                        const fieldValue = row.values[apiName];
+                        if (fieldValue != undefined && fieldValue != '') {
+                            recordFields[apiName] = type == 'number' ? Number(fieldValue) : fieldValue;
+                        }
                     });
-                    ids[row.key] = (await createRecord({ apiName: s.object, fields })).id;
+                    const createdRecord = await createRecord({ apiName: step.object, fields: recordFields });
+                    createdRecordIds[row.key] = createdRecord.id;
                 }));
             }
             showSuccessToast(this, 'Compound action completed successfully!');
