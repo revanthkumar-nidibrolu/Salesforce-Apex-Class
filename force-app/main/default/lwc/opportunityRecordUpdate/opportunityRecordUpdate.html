@@ -1,0 +1,17 @@
+<template>
+    <lightning-card title="Dynamic Opportunity Updater" icon-name="standard:opportunity">
+        <lightning-record-edit-form 
+            object-api-name="Opportunity" 
+            record-id={recordId}
+            onsuccess={handleSuccess}>
+            <lightning-input-field for:each={opportunityFields} for:item="field"
+                key={field} 
+                field-name={field}>
+            </lightning-input-field>
+            <lightning-button
+                type="submit" 
+                label="Update Opportunity">
+            </lightning-button>
+        </lightning-record-edit-form>
+    </lightning-card>
+</template>

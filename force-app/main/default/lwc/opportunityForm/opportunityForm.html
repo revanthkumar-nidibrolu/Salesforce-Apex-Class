@@ -1,0 +1,18 @@
+<template>
+    <lightning-record-edit-form
+        object-api-name="Opportunity"
+        onsubmit={handleSubmit}
+        onsuccess={handleSuccess}
+        onerror={handleError}>
+        <lightning-input-field field-name="Name" class="resettable-field" required></lightning-input-field>
+        <lightning-input-field field-name="StageName" class="resettable-field" required></lightning-input-field>
+        <lightning-input-field field-name="AccountId" value={selectedRecordId} disabled></lightning-input-field>
+        <lightning-input-field field-name="CloseDate" class="resettable-field" required></lightning-input-field>
+
+        <div class="slds-grid slds-grid_align-center slds-m-top_medium">
+            <lightning-button label="Clear"  onclick={handleClear}></lightning-button>
+            <lightning-button class="slds-m-left_small" label="Back" onclick={handleBack}></lightning-button>
+            <lightning-button class="slds-m-left_small" type="submit" label="Save" variant="brand"></lightning-button>
+        </div>
+    </lightning-record-edit-form>
+</template>

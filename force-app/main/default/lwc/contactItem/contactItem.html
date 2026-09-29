@@ -1,0 +1,25 @@
+<template>
+    <div class="slds-var-m-bottom_small">
+        <lightning-card icon-name="standard:contact" title={contact.Name}>
+            <div class="slds-var-p-horizontal_medium slds-grid slds-wrap">
+                <!-- Last Name -->
+                <div class="slds-col slds-size_1-of-2 slds-var-p-vertical_x-small">
+                    <span class="slds-text-color_weak slds-text-title_caps">Last Name</span>
+                    <div class="slds-text-body_regular slds-text-heading_small">{contact.LastName}</div>
+                </div>
+
+                <!-- Phone -->
+                <div class="slds-col slds-size_1-of-2 slds-var-p-vertical_x-small">
+                    <span class="slds-text-color_weak slds-text-title_caps">Phone</span>
+                    <div class="slds-text-body_regular">{contact.Phone}</div>
+                </div>
+
+                <!-- Email -->
+                <div class="slds-col slds-size_1-of-2 slds-var-p-vertical_x-small">
+                    <span class="slds-text-color_weak slds-text-title_caps">Email</span>
+                    <div class="slds-text-body_regular">{contact.Email}</div>
+                </div>
+            </div>
+        </lightning-card>
+    </div>
+</template>

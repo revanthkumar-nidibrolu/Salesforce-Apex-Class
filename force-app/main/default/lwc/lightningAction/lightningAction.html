@@ -1,0 +1,46 @@
+<template>
+    <lightning-quick-action-panel header="New Card">
+        <lightning-record-edit-form
+            object-api-name="Card__c"
+            onsuccess={handleSuccess}
+            onerror={handleError}>
+            <lightning-layout multiple-rows>
+                <lightning-layout-item size="6" padding="around-small">
+                    <template for:each={leftFields} for:item="field">
+                        <lightning-input-field
+                            key={field.apiName}
+                            field-name={field.apiName}
+                            required={field.required}>
+                        </lightning-input-field>
+                    </template>
+                </lightning-layout-item>
+                <lightning-layout-item size="6" padding="around-small">
+                    <template for:each={rightFields} for:item="field">
+                        <lightning-input-field
+                            key={field.apiName}
+                            field-name={field.apiName}
+                            value={recordId}
+                            required={field.required}>  
+                        </lightning-input-field>
+                    </template>
+                </lightning-layout-item>
+            </lightning-layout>
+            <lightning-quick-action-panel>
+                <div class="slds-grid slds-grid_align-end slds-p-around_medium">
+                    <div class="buttonsformat">
+                        <lightning-button
+                            label="Cancel"
+                            onclick={handleCancel}>
+                        </lightning-button>
+                        <lightning-button
+                            class="slds-m-left_small"
+                            variant="brand"
+                            type="submit"
+                            label="Save">
+                        </lightning-button>
+                    </div>
+                </div>
+            </lightning-quick-action-panel>
+        </lightning-record-edit-form>
+    </lightning-quick-action-panel>
+</template>

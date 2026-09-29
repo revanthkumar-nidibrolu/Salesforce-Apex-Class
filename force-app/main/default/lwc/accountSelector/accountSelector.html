@@ -1,0 +1,20 @@
+<template>
+    <lightning-card title="Account Related Contacts" icon-name="standard:account">
+        <div class="slds-var-p-around_medium">
+            <lightning-combobox
+                name="accountSelect"
+                label="Select an Account"
+                placeholder="Choose Account..."
+                options={accountOptions}
+                value={selectedAccountId}
+                onchange={handleAccountChange}>
+            </lightning-combobox>
+            <template if:true={selectedAccountId}>
+                <h3 class="slds-text-heading_small slds-var-m-top_medium">Related Contacts</h3>          
+                <template for:each={contacts} for:item="con">
+                    <c-contact-item key={con.Id} contact={con}></c-contact-item>
+                </template>
+            </template>
+        </div>
+    </lightning-card>
+</template>

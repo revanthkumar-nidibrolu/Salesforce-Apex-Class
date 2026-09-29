@@ -1,0 +1,15 @@
+<template>
+    <lightning-card title="Parent Compount">
+        <div class="slds-p-around_large">
+            <lightning-layout multiple-rows>
+                <lightning-layout-item size="9">
+                    <lightning-input label="Name" lwc:ref="userName"></lightning-input>
+                </lightning-layout-item>
+                <lightning-layout-item size="2">
+                    <lightning-button label="submit" onclick={submitclick}></lightning-button>
+                </lightning-layout-item>
+            </lightning-layout>
+            <c-child-compound>user-Name={parentChild}</c-child-compound>
+        </div>
+    </lightning-card>
+</template>

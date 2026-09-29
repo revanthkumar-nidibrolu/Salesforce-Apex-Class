@@ -1,0 +1,48 @@
+<template>
+    <lightning-card title="Update Annual Revenue" icon-name="standard:account">
+        <div class="slds-m-around_medium">
+            <lightning-record-edit-form
+                record-id={recordId}
+                object-api-name="Account"
+                onsuccess={handleSuccess}
+                onerror={handleError}>
+                <lightning-output-field
+                    field-name="Name">
+                </lightning-output-field>
+                <div class="revenue-section">
+                    <template lwc:if={isEditing}>
+                        <lightning-input-field
+                            field-name="AnnualRevenue">
+                        </lightning-input-field>
+                    </template>
+                    <template lwc:else>
+                        <lightning-output-field
+                            field-name="AnnualRevenue">
+                        </lightning-output-field>
+                        <lightning-button-icon
+                            class="edit-icon"
+                            icon-name="utility:edit"
+                            variant="bare"
+                            onclick={handleEdit}>
+                        </lightning-button-icon>
+                    </template>
+                </div>
+                <template lwc:if={isEditing}>
+                    <div class="slds-grid slds-grid_align-center slds-m-top_medium slds-p-bottom_medium">
+                        <lightning-button
+                            label="Cancel"
+                            variant="neutral"
+                            onclick={handleCancel}
+                            class="slds-m-left_small">
+                        </lightning-button>
+                        <lightning-button
+                            type="submit"
+                            label="Save"
+                            variant="brand">
+                        </lightning-button>
+                    </div>
+                </template>
+            </lightning-record-edit-form>
+        </div>
+    </lightning-card>
+</template>

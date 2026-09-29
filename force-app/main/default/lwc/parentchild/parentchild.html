@@ -1,0 +1,21 @@
+<template>
+    <lightning-card title ="Change Opportunity Stage" icon-name="standard:opportunity">
+        <lightning-record-edit-form 
+            object-api-name="Opportunity" 
+            record-id={recordId} 
+            onsuccess={handleSuccess}>
+        <lightning-input-field
+            field-name="StageName"
+            label="Stage">
+        </lightning-input-field>
+        <lightning-input-field
+            field-name="CloseDate"
+            label="Close Date">
+        </lightning-input-field>
+        <lightning-button 
+            type="submit"
+            label="Update">
+        </lightning-button>
+        </lightning-record-edit-form>
+    </lightning-card>
+</template>

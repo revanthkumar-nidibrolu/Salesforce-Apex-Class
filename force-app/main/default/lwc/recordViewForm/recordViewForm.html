@@ -1,0 +1,12 @@
+<template>
+    <lightning-card title="Record Form">
+        <lightning-record-view-form
+            object-api-name="Opportunity"
+            record-id={recordId}>
+            <lightning-output-field for:each={opportunityFields} for:item="field"
+                key={field} 
+                field-name={field}>
+            </lightning-output-field>
+        </lightning-record-view-form>
+    </lightning-card>
+</template>

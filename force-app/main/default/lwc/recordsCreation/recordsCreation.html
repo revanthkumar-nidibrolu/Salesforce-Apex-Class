@@ -1,0 +1,95 @@
+<template>
+    <div class="slds-box slds-theme_default">
+        <template lwc:if={isSaving}>
+            <lightning-spinner alternative-text="Saving" size="medium"></lightning-spinner>
+        </template>
+        <lightning-progress-indicator current-step={currentStep} type="path" variant="base">
+            <template for:each={steps} for:item="step">
+                <lightning-progress-step key={step.value} label={step.label} value={step.value}></lightning-progress-step>
+            </template>
+        </lightning-progress-indicator>
+        <div class="slds-m-vertical_large rows-wrapper">
+            <div class="fields-scroll" onscroll={handleScroll}>
+                <template for:each={currentRows} for:item="row">
+                    <div key={row.key} class="fields-row">
+                        <template lwc:if={hasParent}>
+                            <div>
+                                <lightning-combobox
+                                    data-row-key={row.key}
+                                    label={parentLabel}
+                                    options={parentOptions}
+                                    value={row.parentValue}
+                                    required
+                                    onchange={handleParentChange}>
+                                </lightning-combobox>
+                            </div>
+                        </template>
+                        <template lwc:else>
+                            <div>
+                                <lightning-input label="Account" value={accountName} readonly></lightning-input>
+                            </div>
+                        </template>
+                        <template for:each={row.fields} for:item="field">
+                            <div key={field.apiName}>
+                                <template lwc:if={field.isPicklist}>
+                                    <lightning-combobox
+                                        data-row-key={row.key}
+                                        data-field={field.apiName}
+                                        label={field.label}
+                                        options={field.options}
+                                        value={field.value}
+                                        required={field.required}
+                                        onchange={handleChange}>
+                                    </lightning-combobox>
+                                </template>
+                                <template lwc:else>
+                                    <lightning-input
+                                        data-row-key={row.key}
+                                        data-field={field.apiName}
+                                        label={field.label}
+                                        type={field.type}
+                                        value={field.value}
+                                        required={field.required}
+                                        onchange={handleChange}>
+                                    </lightning-input>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+            <template lwc:if={isMultiple}>
+                <div class="actions-column">
+                    <template for:each={currentRows} for:item="row">
+                        <div key={row.key} class="row-actions">
+                            <lightning-button-icon
+                                icon-name="utility:add"
+                                data-row-key={row.key}
+                                onclick={handleAddRow}
+                                class="slds-m-right_xx-small">
+                            </lightning-button-icon>
+                            <lightning-button-icon
+                                icon-name="utility:delete"
+                                data-row-key={row.key}
+                                disabled={row.disableRemove}
+                                onclick={handleRemoveRow}>
+                            </lightning-button-icon>
+                        </div>
+                    </template>
+                </div>
+            </template>
+        </div>
+        <div class="slds-grid slds-grid_align-center">
+            <lightning-button label="Cancel" onclick={handleCancel} class="slds-m-right_x-small"></lightning-button>
+            <template lwc:if={showBack}>
+                <lightning-button label="Back" onclick={handleBack} class="slds-m-right_x-small"></lightning-button>
+            </template>
+            <template lwc:if={isLastStep}>
+                <lightning-button label="Finish" variant="success" onclick={handleFinish} disabled={isSaving}></lightning-button>
+            </template>
+            <template lwc:else>
+                <lightning-button label="Next" variant="brand" onclick={handleNext}></lightning-button>
+            </template>
+        </div>
+    </div>
+</template>

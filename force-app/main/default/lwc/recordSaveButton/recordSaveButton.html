@@ -1,0 +1,16 @@
+<template>
+    <lightning-card title="Conditional Save Button" icon-name="standard:account">
+        <lightning-input 
+            label="Enter Name" 
+            value={inputValue} 
+            onchange={handleInputChange}>
+        </lightning-input>
+        <div class= "buttonposition">
+            <lightning-button 
+                lwc:if={isButtonVisible}
+                label="Save"
+                variant="brand">
+            </lightning-button>
+        </div>
+    </lightning-card>
+</template>

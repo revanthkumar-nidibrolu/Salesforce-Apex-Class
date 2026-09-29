@@ -1,0 +1,123 @@
+<template>
+    <lightning-card title={childObjectLabel} icon-name="standard:record">
+        <div class="header-actions">
+            <lightning-button
+                label="New"
+                variant="brand"
+                onclick={handleNewDeal}>
+            </lightning-button>
+        </div>
+        <div class="slds-p-around_medium">
+            <template lwc:if={hasDeals}>
+                <div class="custom-table">
+                    <div class="table-header">
+                        <div class="cell expand-cell"></div>
+                        <template for:each={childFields} for:item="field">
+                            <div class="cell"
+                                key={field.apiName}>{field.label}
+                            </div>
+                        </template>
+                    </div>
+                    <template for:each={dealRows} for:item="deal">
+                        <div key={deal.Id}>
+                            <div class={deal.rowClass}
+                                data-id={deal.Id}
+                                onclick={handleDealClick}>
+                                <div class="cell expand-cell">
+                                    <lightning-icon
+                                        icon-name={deal.iconName}
+                                        size="x-small">
+                                    </lightning-icon>
+                                </div>
+                                <template for:each={deal.cells} for:item="cell">
+                                    <div class="cell" key={cell.key}>{cell.displayValue}</div>
+                                </template>
+                            </div>
+                            <template lwc:if={deal.isExpanded}>
+                                <div class="items-container">
+                                    <template lwc:if={deal.hasItems}>
+                                        <div class="items-title">{grandchildObjectLabel} </div>
+                                        <div class="items-table">
+                                            <div class="item-header">
+                                                <template for:each={grandchildFields} for:item="field">
+                                                    <div class="item-cell"
+                                                        key={field.apiName}>{field.label}
+                                                    </div>
+                                                </template>
+                                            </div>
+                                            <template for:each={deal.dealItems} for:item="item">
+                                                <div class="item-row"
+                                                    key={item.Id}>
+                                                    <template for:each={item.cells} for:item="cell">
+                                                        <div class="item-cell"
+                                                            key={cell.key}>{cell.displayValue}
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+                                    <template lwc:else>
+                                        <div class="no-items">
+                                            No {grandchildObjectLabel} found.
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+    <template lwc:if={showNewDealForm}>
+        <section class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close"
+                        title="Close"
+                        onclick={handleCancel}>
+                        <lightning-icon
+                            icon-name="utility:close"
+                            size="small">
+                        </lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 class="slds-text-heading_medium">New {childObjectLabel}</h2>
+                </header>
+                <lightning-record-edit-form object-api-name={childObjectApiName}
+                                            onsubmit={handleSubmit}
+                                            onsuccess={handleSaveSuccess}
+                                            onerror={handleSaveError}>
+                    <div class="slds-modal__content slds-p-around_medium">
+                        <div class="create-form-grid">
+                            <template for:each={createFields} for:item="field">
+                                <div class="form-field"
+                                    key={field.apiName}>
+                                    <lightning-input-field
+                                        field-name={field.apiName}
+                                        required={field.required}
+                                        value={field.value}>
+                                    </lightning-input-field>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <lightning-button
+                            label="Cancel"
+                            onclick={handleCancel}>
+                        </lightning-button>
+                        <lightning-button
+                            class="slds-m-left_small"
+                            label="Save"
+                            variant="brand"
+                            onclick={handleSave}>
+                        </lightning-button>
+                    </footer>
+                </lightning-record-edit-form>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

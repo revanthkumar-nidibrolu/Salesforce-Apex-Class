@@ -1,0 +1,28 @@
+<template>
+    <lightning-card title="Account" icon-name="standard:account">
+        <div class="valuePosition">
+            <lightning-input
+                label="Account Name"
+                value={name}
+                onchange={handleNameChange}
+                placeholder="Enter account name">
+            </lightning-input>
+        </div>
+        <div class = "buttonPosition">
+            <template lwc:if={isHomePage}>
+                <lightning-button
+                    label="Create Account"
+                    variant="brand"
+                    onclick={handleCreateAccount}>
+                </lightning-button>
+            </template>
+            <template lwc:if={isRecordPage}>
+                <lightning-button
+                    label="Update Account"
+                    variant="brand"
+                    onclick={handleUpdateAccount}>
+                </lightning-button>
+            </template>
+        </div>
+    </lightning-card>
+</template>

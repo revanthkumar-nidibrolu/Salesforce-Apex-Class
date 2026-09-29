@@ -1,0 +1,48 @@
+<template>
+    <lightning-card title="Records" icon-name="standard:record">
+        <div class="path-container">
+            <lightning-progress-indicator
+                current-step={currentStep}
+                type="path"
+                variant="base"
+                onclick={handlePathClick}>
+                <lightning-progress-step label="Opportunities" value="opportunities"></lightning-progress-step>
+                <lightning-progress-step label="Deal Items" value="dealitems"></lightning-progress-step>
+                <lightning-progress-step label="Cards" value="cards"></lightning-progress-step>
+            </lightning-progress-indicator>
+        </div>
+        <template lwc:if={showOpportunities}>
+            <div class="slds-p-around_medium">
+                <lightning-datatable
+                    key-field="id"
+                    data={opportunities}
+                    columns={opportunityColumns}
+                    hide-checkbox-column
+                    onrowaction={handleRowAction}>
+                </lightning-datatable>
+            </div>
+        </template>
+        <template lwc:if={showDealItems}>
+            <div class="slds-p-around_medium">
+                <lightning-datatable
+                    key-field="id"
+                    data={dealItems}
+                    columns={dealItemColumns}
+                    hide-checkbox-column
+                    onrowaction={handleRowAction}>
+                </lightning-datatable>
+            </div>
+        </template>
+        <template lwc:if={showCards}>
+            <div class="slds-p-around_medium">
+                <lightning-datatable
+                    key-field="id"
+                    data={cards}
+                    columns={cardColumns}
+                    hide-checkbox-column
+                    onrowaction={handleRowAction}>
+                </lightning-datatable>
+            </div>
+        </template>
+    </lightning-card>
+</template>

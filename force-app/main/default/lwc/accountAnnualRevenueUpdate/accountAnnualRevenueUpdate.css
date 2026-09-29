@@ -1,0 +1,8 @@
+.revenue-section {
+    position: relative;
+}
+.edit-icon {
+    position: absolute;
+    right: 0;
+    top: 25px;
+}

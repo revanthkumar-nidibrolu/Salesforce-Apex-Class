@@ -1,0 +1,15 @@
+<template>
+    <lightning-card title = "Create Account">
+        <lightning-input
+        label = "Account Name"
+        value = {accountName}
+        onchange = {handleAccountName}
+        required>
+        </lightning-input>
+        <lightning-button
+        label = "create Account"
+        variant = "brand"
+        onclick = {createAccount}>
+        </lightning-button>
+    </lightning-card>
+</template>

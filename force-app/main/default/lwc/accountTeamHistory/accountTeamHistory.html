@@ -1,0 +1,17 @@
+<template>
+    <lightning-card title="Account Team History" icon-name="standard:channel_program_history">
+        <div class="slds-m-around_medium">
+            <template if:true={data.length}>
+                <lightning-datatable
+                    key-field="Id"
+                    data={data}
+                    columns={columns}
+                    hide-checkbox-column>
+                </lightning-datatable>
+            </template>
+            <template if:false={data.length}>
+                <p class="slds-text-align_center slds-text-color_weak">No Account Team History records found.</p>
+            </template>
+        </div>
+    </lightning-card>
+</template>

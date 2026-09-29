@@ -1,0 +1,24 @@
+<template>
+    <lightning-card title="Find an account" icon-name="standard:account">
+        <div class="slds-m-around_medium">
+            <div class="slds-grid slds-grid_vertical-align-end slds-gutter_x-medium">
+                <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-3">
+                    <lightning-record-picker
+                        label="Select an Account"
+                        object-api-name="Account"
+                        placeholder="Search Accounts..."
+                        onchange={accountChange}>
+                    </lightning-record-picker>
+                </div>
+                <template lwc:if={buttonDisable}>
+                    <div class="slds-col slds-grow-0">
+                        <lightning-button-icon
+                            icon-name="utility:delete"
+                            onclick={deleteAccount}>
+                        </lightning-button-icon>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </lightning-card>
+</template>

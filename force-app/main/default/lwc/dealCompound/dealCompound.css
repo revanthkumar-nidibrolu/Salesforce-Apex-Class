@@ -1,0 +1,101 @@
+.custom-table {
+    width: 100%;
+    border: 1px solid #d8dde6;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.table-header {
+    display: grid;
+    grid-template-columns: 20px 2fr 1fr 1fr 1fr;
+    background: #f3f3f3;
+    border-bottom: 1px solid #d8dde6;
+    font-weight: 700;
+    color: #181818;
+}
+.cell {
+    padding: 8px;
+    border-right: 1px solid #e5e5e5;
+}
+.expand-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.deal-row {
+    display: grid;
+    grid-template-columns: 20px 2fr 1fr 1fr 1fr;
+    cursor: pointer;
+    border-bottom: 1px solid #e5e5e5;
+    background: white;
+}
+.items-container {
+    margin: 0;
+    padding: 16px 24px 20px 64px;
+    background: #f8f9fb;
+    border-bottom: 1px solid #d8dde6;
+}
+.items-title {
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+.items-table {
+    border: 1px solid #d8dde6;
+    border-radius: 4px;
+    overflow: hidden;
+    background: white;
+}
+.item-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    background: #f3f3f3;
+    font-weight: 700;
+    border-bottom: 1px solid #d8dde6;
+}
+.item-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    border-bottom: 1px solid #e5e5e5;
+}
+.item-row:last-child {
+    border-bottom: none;
+}
+.item-cell {
+    padding: 8px 10px;
+    border-right: 1px solid #e5e5e5;
+}
+.no-items {
+    padding: 10px;
+    text-align: center;
+    color: #666;
+    background: white;
+    border: 1px solid #d8dde6;
+    border-radius: 4px;
+}
+.header-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0 24px;
+    margin-top: -30px;
+    margin-bottom: 8px;
+}
+.header-actions lightning-button {
+    --slds-c-button-radius-border: 2px;
+}
+.slds-modal__container {
+    max-width: 60rem;
+    width: 70%;
+}
+.slds-modal__header {
+    border-radius: 8px 8px 0 0;
+}
+.slds-modal__footer {
+    display: flex;
+    justify-content: center;
+}
+.slds-modal__content {
+    min-height: 250px;
+}
+.custom-modal-content {
+    padding: 16px 24px 24px 24px;
+}

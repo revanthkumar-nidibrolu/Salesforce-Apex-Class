@@ -1,0 +1,17 @@
+<template>
+    <lightning-card title="Parent: Account Live Editor" icon-name="standard:account">
+        <div class="slds-var-m-around_medium">
+            <lightning-record-edit-form object-api-name="Account" record-id={recordId}>
+                <lightning-input-field field-name="Name" onchange={handleFieldChange}></lightning-input-field>
+                <lightning-input-field field-name="Industry" onchange={handleFieldChange}></lightning-input-field>
+                <lightning-button class="slds-var-m-top_small" type="submit" label="Save Account Data"></lightning-button>
+            </lightning-record-edit-form>
+        </div>
+        <div class="slds-var-m-around_medium slds-border_top slds-var-p-top_medium">
+            <c-child-opportunity-list 
+                parent-account-name={accountName} 
+                parent-account-industry={accountIndustry}>
+            </c-child-opportunity-list>
+        </div>
+    </lightning-card>
+</template>

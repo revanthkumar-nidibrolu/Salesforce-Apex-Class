@@ -1,0 +1,16 @@
+<template>
+    <lightning-card title="Account Related Contacts" icon-name="standard:contact">
+        <div class="slds-var-m-around_medium">
+            <template lwc:if={accountName}>
+                <div class="slds-text-heading_small">
+                    Parent Account Name: <strong>{accountName}</strong>
+                </div>
+            </template>
+            <template lwc:else>
+                <div class="slds-align_absolute-center">
+                    <lightning-spinner alternative-text="Loading Account details..."></lightning-spinner>
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+</template>

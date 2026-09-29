@@ -1,0 +1,19 @@
+<template>
+    <lightning-card title="Opportunity Related Deals" icon-name="standard:record">
+        <div class="slds-p-around_medium">
+            <template lwc:if={hasDeals}>
+                <div class="slds-m-top_medium">
+                    <lightning-datatable
+                        key-field="Id"
+                        data={datatable}
+                        columns={columns}
+                        hide-checkbox-column>
+                    </lightning-datatable>
+                </div>
+            </template>
+            <template lwc:else>
+                <div class="slds-align_absolute-center slds-p-around_medium">{label.NoDealsFound}</div>
+            </template>
+        </div>
+    </lightning-card>
+</template>

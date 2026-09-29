@@ -1,0 +1,16 @@
+.path-container {
+    padding: 10px 10px 5px;
+    box-sizing: border-box;
+    width: 100%;
+}
+.slds-p-around_medium {
+    height: 300px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    display: block;
+}
+.lightning-datatable {
+    width: 100%;
+    display: block;
+}

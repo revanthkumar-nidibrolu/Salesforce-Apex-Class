@@ -1,0 +1,25 @@
+<template>
+    <lightning-card title="Records" icon-name="standard:record">
+        <div class="path-container">
+            <lightning-progress-indicator
+                current-step={currentStep}
+                type="path"
+                variant="base"
+                onclick={handlePathClick}>
+                <template for:each={tabs} for:item="tab">
+                    <lightning-progress-step key={tab.value} label={tab.label} value={tab.value}></lightning-progress-step>
+                </template>
+            </lightning-progress-indicator>
+        </div>
+        <template lwc:if={showRecords}>
+            <div class="slds-p-around_medium">
+                <lightning-datatable
+                    key-field="id"
+                    data={records}
+                    columns={columns}
+                    hide-checkbox-column>
+                </lightning-datatable>
+            </div>
+        </template>
+    </lightning-card>
+</template>

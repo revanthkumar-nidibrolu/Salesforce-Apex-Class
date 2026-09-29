@@ -1,0 +1,136 @@
+<template>
+    <lightning-card title="Related Deals" icon-name="standard:opportunity">
+        <div class="header-actions">
+            <lightning-button
+                label="New"
+                variant="brand"
+                onclick={handleNewDeal}>
+            </lightning-button>
+        </div>
+        <div class="slds-p-around_medium">
+            <template lwc:if={hasDeals}>
+                <div class="custom-table">
+                    <div class="table-header">
+                        <div class="cell expand-cell"></div>
+                        <div class="cell">Deal Name</div>
+                        <div class="cell">Active</div>
+                        <div class="cell">Start Date</div>
+                        <div class="cell">End Date</div>
+                    </div>
+                    <template for:each={dealRows} for:item="deal">
+                        <div key={deal.Id}>
+                            <div class={deal.rowClass}
+                                data-id={deal.Id}
+                                onclick={handleDealClick}>
+                                <div class="cell expand-cell">
+                                    <lightning-icon
+                                        icon-name={deal.iconName}
+                                        size="x-small"
+                                        alternative-text="Expand">
+                                    </lightning-icon>
+                                </div>
+                                <div class="cell">{deal.Name}</div>
+                                <div class="cell">
+                                    <template lwc:if={deal.Active__c}>
+                                        <span class="active-badge">Active</span>
+                                    </template>
+                                    <template lwc:else>
+                                        <span class="inactive-badge">Inactive</span>
+                                    </template>
+                                </div>
+                                <div class="cell">{deal.Start_Date__c}</div>
+                                <div class="cell">{deal.End_Date__c}</div>
+                            </div>
+                            <template lwc:if={deal.isExpanded}>
+                                <div class="items-container">
+                                    <template lwc:if={deal.hasItems}>
+                                        <div class="items-title">Deal Items</div>
+                                        <div class="items-table">
+                                            <div class="item-header">
+                                                <div class="item-cell">Deal Item Name</div>
+                                                <div class="item-cell">Amount</div>
+                                                <div class="item-cell">Phone</div>
+                                            </div>
+                                            <template
+                                                for:each={deal.dealItems}
+                                                for:item="item">
+                                                <div class="item-row"
+                                                    key={item.Id}>
+                                                    <div class="item-cell">{item.Name}</div>
+                                                    <div class="item-cell">{item.Amount__c}</div>
+                                                    <div class="item-cell">{item.Phone__c}</div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+                                    <template lwc:else>
+                                        <div class="no-items">No Deal Items found.</div>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+    <template lwc:if={showNewDealForm}>
+        <section class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close"
+                        title="Close"
+                        onclick={handleCancel}>
+                        <lightning-icon
+                            icon-name="utility:close"
+                            size="small">
+                        </lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 class="slds-text-heading_medium">New Deal</h2>
+                </header>
+                <div class="slds-modal__content custom-modal-content">
+                    <lightning-record-edit-form
+                        object-api-name="Deal__c"
+                        onsuccess={handleSaveSuccess}
+                        onerror={handleSaveError}>
+                        <div class="slds-grid slds-gutters">
+                            <div class="slds-col slds-size_1-of-2">
+                                <template for:each={leftFields} for:item="field">
+                                    <lightning-input-field
+                                        key={field.apiName}
+                                        field-name={field.apiName}
+                                        required={field.required}>
+                                    </lightning-input-field>
+                                </template>
+                            </div>
+                            <div class="slds-col slds-size_1-of-2">
+                                <template for:each={rightFieldsValue} for:item="field">
+                                    <lightning-input-field
+                                        key={field.apiName}
+                                        field-name={field.apiName}
+                                        required={field.required}
+                                        value={field.value}>
+                                    </lightning-input-field>
+                                </template>
+                            </div>
+                        </div>
+                    </lightning-record-edit-form>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button
+                        label="Cancel"
+                        onclick={handleCancel}>
+                    </lightning-button>
+                    <lightning-button
+                        class="slds-m-left_small"
+                        label="Save"
+                        variant="brand"
+                        onclick={handleSave}>
+                    </lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

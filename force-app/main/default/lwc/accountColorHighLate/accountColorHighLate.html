@@ -1,0 +1,23 @@
+<template>
+    <lightning-card title="Account Data" icon-name="standard:account">
+        <div class="slds-m-around_medium">
+            <lightning-record-picker
+                label="Select an Account"
+                object-api-name="Account"
+                placeholder="Search Accounts..."
+                value={selectedAccountId}
+                onchange={accountChange}>
+            </lightning-record-picker>
+            <template lwc:if={datatable.length}>
+                <div class="slds-m-top-medium">
+                    <lightning-datatable
+                        key-field="Id"
+                        data={datatable}
+                        columns={columns}
+                        hide-checkbox-column>
+                    </lightning-datatable>
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+</template>

@@ -1,0 +1,36 @@
+.rows-wrapper {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    width: 100%;
+    min-width: 0;
+}
+
+.fields-scroll {
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.fields-row {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: calc((100% - 3rem) / 5);
+    column-gap: 0.75rem;
+    align-items: end;
+    min-width: max-content;
+    padding-bottom: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.actions-column {
+    padding-left: 0.5rem;
+    white-space: nowrap;
+}
+
+.row-actions {
+    height: 64px; 
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin-bottom: 0.5rem;
+}

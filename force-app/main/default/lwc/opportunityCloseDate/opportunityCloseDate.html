@@ -1,0 +1,19 @@
+<template>
+    <lightning-card title="Close Date Update" icon-name="standard:opportunity">
+        <lightning-record-edit-form 
+            object-api-name="Opportunity" 
+            record-id={recordId}
+            onsuccess={handleSuccess}>
+            <lightning-input-field 
+                field-name="CloseDate">
+            </lightning-input-field>
+            <div class = "saveButton">
+                <lightning-button
+                    type="submit" 
+                    label="Save"
+                    variant="brand">
+                </lightning-button>
+            </div>
+        </lightning-record-edit-form>
+    </lightning-card>
+</template>

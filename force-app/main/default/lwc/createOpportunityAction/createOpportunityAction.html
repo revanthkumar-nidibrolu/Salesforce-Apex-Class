@@ -1,0 +1,36 @@
+<template>
+    <lightning-quick-action-panel header="New Opportunity">
+        <lightning-record-edit-form
+            lwc:ref="editForm"
+            object-api-name="Opportunity"
+            onsuccess={handleSuccess}
+            onerror={handleError}>
+            <div class="slds-grid slds-wrap slds-gutters">
+                <div class="slds-col slds-size_1-of-2">
+                    <template for:each={leftfields} for:item="field">
+                        <lightning-input-field
+                            key={field.apiName}
+                            field-name={field.apiName}
+                            required={field.required}>
+                        </lightning-input-field>
+                    </template>
+                </div>
+                <div class="slds-col slds-size_1-of-2">
+                    <template for:each={rightfields} for:item="field">
+                        <lightning-input-field
+                            key={field.apiName}
+                            field-name={field.apiName}
+                            value={field.value}
+                            disabled={field.disabled}
+                            required={field.required}>
+                        </lightning-input-field>
+                    </template>
+                </div>
+            </div>
+        </lightning-record-edit-form>
+        <div slot="footer" class="slds-grid slds-grid_align-center">
+            <lightning-button label="Cancel" onclick={handleCancel}></lightning-button>
+            <lightning-button class="slds-m-left_small" variant="brand" label="Save" onclick={handleSave}></lightning-button>
+        </div>
+    </lightning-quick-action-panel>
+</template>

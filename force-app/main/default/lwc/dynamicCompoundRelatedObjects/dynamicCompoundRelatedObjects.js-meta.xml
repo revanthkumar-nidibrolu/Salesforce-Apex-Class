@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <isExposed>true</isExposed>
+    <targets>
+        <target>lightning__RecordPage</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__RecordPage">
+            <property name="childObjectApiName" type="String"
+                label="Child Object API Name" required="true"/>
+            <property name="childObjectFieldApiNames" type="String"
+                label="Child Fields" required="true"/>
+            <property name="childParentFieldApiName" type="String"
+                label="Child Parent Lookup Field" required="true"/>
+            <property name="grandchildObjectApiName" type="String"
+                label="Grandchild Object API Name" required="true"/>
+            <property name="grandchildObjectFieldApiNames" type="String"
+                label="Grandchild Fields" required="true"/>
+            <property name="grandchildParentFieldApiName" type="String"
+                label="Grandchild Parent Lookup Field" required="true"/>
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

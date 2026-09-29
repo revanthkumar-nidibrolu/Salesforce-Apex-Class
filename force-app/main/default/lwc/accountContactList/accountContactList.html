@@ -1,0 +1,23 @@
+<template>
+    <div class="slds-box slds-theme_default slds-m-top_small">
+        <!-- Replaced {contacts.length} with {contactCount} -->
+        <h3 class="slds-text-heading_small slds-m-bottom_small">
+            Related Contacts ({contactCount})
+        </h3>
+
+        <template if:true={hasContacts}>
+            <ul class="slds-has-dividers_bottom-space">
+                <template for:each={contacts} for:item="con">
+                    <li key={con.Id} class="slds-item slds-p-vertical_x-small">
+                        <p><strong>{con.Name}</strong> - <em>{con.Title}</em></p>
+                        <p class="slds-text-color_weak">Email: {con.Email} | Phone: {con.Phone}</p>
+                    </li>
+                </template>
+            </ul>
+        </template>
+
+        <template if:false={hasContacts}>
+            <p class="slds-text-color_weak">No contacts found for this account.</p>
+        </template>
+    </div>
+</template>

@@ -1,0 +1,26 @@
+<template>
+    <lightning-card title="Record History Last 24 Hours">
+        <lightning-button
+            slot="actions"
+            label="Refresh"
+            icon-name="utility:refresh"
+            onclick={handleRefresh}>
+        </lightning-button>
+        <div class="slds-p-horizontal_medium">
+            <template lwc:if={errorMessage}>
+                <div class="slds-text-color_error slds-p-vertical_small">{errorMessage}</div>
+            </template>
+            <template lwc:if={isEmpty}>
+                <div class="slds-p-vertical_medium slds-align_absolute-center">{label.NoFieldChangesMessage}</div>
+            </template>
+            <template lwc:if={hasHistory}>
+                <lightning-datatable
+                    key-field="id"
+                    data={history}
+                    columns={columns}
+                    hide-checkbox-column>
+                </lightning-datatable>
+            </template>
+        </div>
+    </lightning-card>
+</template>
