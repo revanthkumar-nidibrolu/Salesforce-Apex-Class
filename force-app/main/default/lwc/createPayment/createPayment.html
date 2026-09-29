@@ -1,0 +1,44 @@
+<template>
+    <div class="slds-box slds-theme_default">
+        <template lwc:if={isSaving}>
+            <lightning-spinner alternative-text="Saving" size="medium"></lightning-spinner>
+        </template>
+        <lightning-progress-indicator current-step={currentStep} type="path" variant="base">
+            <template for:each={steps} for:item="step">
+                <lightning-progress-step key={step.value} label={step.label} value={step.value}></lightning-progress-step>
+            </template>
+        </lightning-progress-indicator>
+        <div class="slds-m-vertical_large">
+            <template lwc:if={hasParent}>
+                <lightning-input variant="label-inline" label={parentLabel} value={parentName} readonly></lightning-input>
+            </template>
+            <template lwc:else>
+                <lightning-input variant="label-inline" label="Account" value={accountName} readonly></lightning-input>
+            </template>
+            <template for:each={currentFields} for:item="field">
+                <lightning-input
+                    key={field.apiName}
+                    variant="label-inline"
+                    data-field={field.apiName}
+                    label={field.label}
+                    type={field.type}
+                    value={field.value}
+                    required={field.required}
+                    onchange={handleChange}>
+                </lightning-input>
+            </template>
+        </div>
+        <div class="slds-grid slds-grid_align-center">
+            <lightning-button label="Cancel" onclick={handleCancel} class="slds-m-right_x-small"></lightning-button>
+            <template lwc:if={showBack}>
+                <lightning-button label="Back" onclick={handleBack} class="slds-m-right_x-small"></lightning-button>
+            </template>
+            <template lwc:if={isLastStep}>
+                <lightning-button label="Finish" variant="success" onclick={handleFinish} disabled={isSaving}></lightning-button>
+            </template>
+            <template lwc:else>
+                <lightning-button label="Next" variant="brand" onclick={handleNext}></lightning-button>
+            </template>
+        </div>
+    </div>
+</template>
