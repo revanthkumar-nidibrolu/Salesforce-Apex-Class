@@ -1,0 +1,29 @@
+<template>
+    <lightning-card title="Add Credit Card" icon-name="standard:account">
+        <div class="slds-p-around_medium">
+            <lightning-record-picker
+                label="Bank"
+                object-api-name="Bank__c"
+                value={bankId}
+                required
+                disabled>
+            </lightning-record-picker>
+            <template for:each={fields} for:item="field">
+                <lightning-input
+                    key={field.name}
+                    label={field.label}
+                    required={field.required}
+                    data-field={field.name}
+                    onchange={handleChange}>
+                </lightning-input>
+            </template>
+            <div class="slds-m-top_small slds-align_absolute-center">
+                <lightning-button
+                    label="Create"
+                    variant="brand"
+                    onclick={handleCreate}>
+                </lightning-button>
+            </div>
+        </div>
+    </lightning-card>
+</template>

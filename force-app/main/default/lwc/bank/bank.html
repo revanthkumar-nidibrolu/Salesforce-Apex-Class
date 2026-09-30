@@ -1,0 +1,29 @@
+<template>
+    <lightning-card>
+        <div class="slds-p-around_medium">
+            <template lwc:if={showForm}>
+                <c-credit-cards
+                    bank-id={recordId}
+                    oncardadded={handleCardAdded}>
+                </c-credit-cards>
+            </template>
+            <template lwc:else>
+                <h3 class="slds-m-bottom_x-small slds-text-heading_small">Cards of this bank</h3>
+                <lightning-datatable
+                    key-field="id"
+                    data={cards}
+                    columns={columns}
+                    hide-checkbox-column
+                    show-row-number-column>
+                </lightning-datatable>
+                <div class="slds-m-top_medium slds-align_absolute-center">
+                    <lightning-button
+                        label="Add Another Card"
+                        variant="brand"
+                        onclick={handleAddAnother}>
+                    </lightning-button>
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+</template>
