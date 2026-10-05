@@ -1,14 +1,53 @@
 <template>
-    <lightning-card title="Opportunity Data" icon-name="standard:opportunity">
-        <div class="slds-m-around_medium">
-            <template lwc:if={datatable.length}>
-                <lightning-datatable
-                    key-field="Id"
-                    data={datatable}
-                    columns={columns}
-                    hide-checkbox-column>
-                </lightning-datatable>
+    <lightning-card title="Opportunities" icon-name="standard:opportunity">
+        <div slot="actions">
+            <lightning-input
+                type="search"
+                variant="label-hidden"
+                label="Search"
+                placeholder="Search opportunities"
+                value={searchTerm}
+                onchange={handleSearch}>
+            </lightning-input>
+        </div>
+        <div class="slds-p-horizontal_small">
+            <c-opportunity-picklist
+                key-field="Id"
+                data={pagedData}
+                columns={columns}
+                draft-values={draftValues}
+                sorted-by={sortedBy}
+                sorted-direction={sortDirection}
+                onsort={handleSort}
+                onsave={handleSave}
+                oncancel={handleCancel}
+                hide-checkbox-column>
+            </c-opportunity-picklist>
+        </div>
+        <div slot="footer" class="slds-grid slds-grid_align-center slds-grid_vertical-align-center">
+            <lightning-button
+                label="Previous"
+                icon-name="utility:chevronleft"
+                onclick={handlePrevious}
+                disabled={isFirstPage}>
+            </lightning-button>
+            <template for:each={pageNumbers} for:item="p">
+                <lightning-button
+                    key={p.number}
+                    label={p.label}
+                    data-page={p.number}
+                    variant={p.variant}
+                    class="slds-var-m-horizontal_xx-small"
+                    onclick={handlePageClick}>
+                </lightning-button>
             </template>
+            <lightning-button
+                label="Next"
+                icon-name="utility:chevronright"
+                icon-position="right"
+                onclick={handleNext}
+                disabled={isLastPage}>
+            </lightning-button>
         </div>
     </lightning-card>
 </template>
