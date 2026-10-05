@@ -1,8 +1,10 @@
 import { LightningElement, wire } from 'lwc';
 import { getListUi } from 'lightning/uiListApi';
 import { getObjectInfo, getPicklistValues } from 'lightning/uiObjectInfoApi';
-import { updateRecord } from 'lightning/uiRecordApi';
+import { updateRecord, deleteRecord } from 'lightning/uiRecordApi';
 import { showToast } from 'c/toastClass';
+import { NavigationMixin } from 'lightning/navigation';
+import LightningConfirm from 'lightning/confirm';
 import OPPORTUNITY_OBJECT from '@salesforce/schema/Opportunity';
 import NAME_FIELD from '@salesforce/schema/Opportunity.Name';
 import AMOUNT_FIELD from '@salesforce/schema/Opportunity.Amount';
@@ -15,6 +17,12 @@ const FIELDS = [NAME_FIELD, AMOUNT_FIELD, STAGENAME_FIELD, CLOSEDATE_FIELD, ACCO
 const RECORDS_PER_PAGE = 10;
 const MAX_PAGE_BUTTONS = 5;
 
+const ROW_ACTIONS = [
+    { label: 'View', name: 'view' },
+    { label: 'Edit', name: 'edit' },
+    { label: 'Delete', name: 'delete' }
+];
+
 const COLUMNS = [
     { label: 'Opportunity Name', fieldName: 'Name', editable: true },
     { label: 'Amount', fieldName: 'Amount', sortable: true },
@@ -22,10 +30,11 @@ const COLUMNS = [
         typeAttributes: { options: { fieldName: 'stageOptions' } } },
     { label: 'Close Date', fieldName: 'CloseDate' },
     { label: 'Account Name', fieldName: 'AccountName' },
-    { label: 'Owner Name', fieldName: 'OwnerName' }
+    { label: 'Owner Name', fieldName: 'OwnerName' },
+    { type: 'action', typeAttributes: { rowActions: ROW_ACTIONS, menuAlignment: 'auto' } }
 ];
 
-export default class OpportunityDataTable extends LightningElement {
+export default class OpportunityDataTable extends NavigationMixin(LightningElement) {
     columns = COLUMNS;
     data = [];
     pageToken = null;
@@ -136,7 +145,7 @@ export default class OpportunityDataTable extends LightningElement {
         return pages;
     }
 
-    get isFirstPage() { return this.currentPage === 1; }
+    get isFirstPage() { return this.currentPage == 1; }
     get isLastPage() { return this.currentPage >= this.totalPages; }
 
     handlePrevious() {
@@ -153,6 +162,53 @@ export default class OpportunityDataTable extends LightningElement {
 
     handlePageClick(event) {
         this.currentPage = Number(event.currentTarget.dataset.page);
+    }
+
+    handleRowAction(event) {
+        const { action, row } = event.detail;
+        switch (action.name) {
+            case 'view':
+                this.openRecord(row.Id, 'view');
+                break;
+            case 'edit':
+                this.openRecord(row.Id, 'edit');
+                break;
+            case 'delete':
+                this.deleteRow(row);
+                break;
+            default:
+        }
+    }
+
+    openRecord(recordId, actionName) {
+        this[NavigationMixin.Navigate]({
+            type: 'standard__recordPage',
+            attributes: { recordId, objectApiName: 'Opportunity', actionName }
+        });
+    }
+
+    async deleteRow(row) {
+        const confirmed = await LightningConfirm.open({
+            message: `Delete ${row.Name} opportunity record`,
+            label: 'Delete Opportunity',
+            theme: 'error'
+        });
+        if(!confirmed) {
+            return;
+        }
+
+        try {
+            await deleteRecord(row.Id);
+            this.rows.delete(row.Id);
+            this.data = Array.from(this.rows.values());
+            this.draftValues = this.draftValues.filter(d => d.Id != row.Id);
+            if(this.currentPage > this.totalPages) {
+                this.currentPage = this.totalPages;
+            }
+            showToast(this, 'Success', 'Opportunity deleted', 'success');
+        } catch(error) {
+            showToast(this, 'Error', error.body?.message, 'error');
+        }
     }
 
     async handleSave(event) {
