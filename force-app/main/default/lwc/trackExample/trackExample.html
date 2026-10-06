@@ -1,0 +1,16 @@
+<template>
+    <lightning-card title="Opportunity" icon-name="standard:opportunity">
+        <div class="slds-var-p-around_medium">
+            <lightning-record-view-form
+                record-id={recordId}
+                object-api-name={objectApiName}>
+                <template for:each={opportunity.fields} for:item="field">
+                    <lightning-output-field
+                        key={field.key}
+                        field-name={field.key}>
+                    </lightning-output-field>
+                </template>
+            </lightning-record-view-form>
+        </div>
+    </lightning-card>
+</template>
