@@ -10,10 +10,11 @@ import NAME_FIELD from '@salesforce/schema/Opportunity.Name';
 import AMOUNT_FIELD from '@salesforce/schema/Opportunity.Amount';
 import STAGENAME_FIELD from '@salesforce/schema/Opportunity.StageName';
 import CLOSEDATE_FIELD from '@salesforce/schema/Opportunity.CloseDate';
+import ACCOUNTID_FIELD from '@salesforce/schema/Opportunity.AccountId';
 import ACCOUNTNAME_FIELD from '@salesforce/schema/Opportunity.Account.Name';
 import OWNERNAME_FIELD from '@salesforce/schema/Opportunity.Owner.Name';
 
-const FIELDS = [NAME_FIELD, AMOUNT_FIELD, STAGENAME_FIELD, CLOSEDATE_FIELD, ACCOUNTNAME_FIELD, OWNERNAME_FIELD];
+const FIELDS = [NAME_FIELD, AMOUNT_FIELD, STAGENAME_FIELD, CLOSEDATE_FIELD, ACCOUNTID_FIELD, ACCOUNTNAME_FIELD, OWNERNAME_FIELD]; // NEW: added ACCOUNTID_FIELD
 const RECORDS_PER_PAGE = 10;
 const MAX_PAGE_BUTTONS = 5;
 
@@ -29,7 +30,8 @@ const COLUMNS = [
     { label: 'Stage', fieldName: 'StageName', type: 'picklist', editable: true,
         typeAttributes: { options: { fieldName: 'stageOptions' } } },
     { label: 'Close Date', fieldName: 'CloseDate' },
-    { label: 'Account Name', fieldName: 'AccountName' },
+    { label: 'Account Name', fieldName: 'AccountUrl', type: 'url',
+        typeAttributes: { label: { fieldName: 'AccountName' }, target: '_self'} },
     { label: 'Owner Name', fieldName: 'OwnerName' },
     { type: 'action', typeAttributes: { rowActions: ROW_ACTIONS, menuAlignment: 'auto' } }
 ];
@@ -56,6 +58,7 @@ export default class OpportunityDataTable extends NavigationMixin(LightningEleme
     wiredList({ data, error }) {
         if(data) {
             data.records.records.forEach(rec => {
+                const accountId = rec.fields.AccountId?.value;
                 this.rows.set(rec.id, {
                     Id: rec.id,
                     Name: rec.fields.Name.value,
@@ -63,6 +66,7 @@ export default class OpportunityDataTable extends NavigationMixin(LightningEleme
                     StageName: rec.fields.StageName.value,
                     CloseDate: rec.fields.CloseDate.value,
                     AccountName: rec.fields.Account?.value?.fields?.Name?.value ?? '',
+                    AccountUrl: accountId ? `/lightning/r/Account/${accountId}/view` : '',
                     OwnerName: rec.fields.Owner?.value?.fields?.Name?.value ?? ''
                 });
             });
