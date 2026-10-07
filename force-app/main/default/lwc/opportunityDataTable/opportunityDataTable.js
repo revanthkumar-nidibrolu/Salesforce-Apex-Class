@@ -7,6 +7,7 @@ import { NavigationMixin } from 'lightning/navigation';
 import LightningConfirm from 'lightning/confirm';
 import OPPORTUNITY_OBJECT from '@salesforce/schema/Opportunity';
 import NAME_FIELD from '@salesforce/schema/Opportunity.Name';
+import OPPORTUNITYID_FIELD from '@salesforce/schema/Opportunity.Id';
 import AMOUNT_FIELD from '@salesforce/schema/Opportunity.Amount';
 import STAGENAME_FIELD from '@salesforce/schema/Opportunity.StageName';
 import CLOSEDATE_FIELD from '@salesforce/schema/Opportunity.CloseDate';
@@ -14,7 +15,8 @@ import ACCOUNTID_FIELD from '@salesforce/schema/Opportunity.AccountId';
 import ACCOUNTNAME_FIELD from '@salesforce/schema/Opportunity.Account.Name';
 import OWNERNAME_FIELD from '@salesforce/schema/Opportunity.Owner.Name';
 
-const FIELDS = [NAME_FIELD, AMOUNT_FIELD, STAGENAME_FIELD, CLOSEDATE_FIELD, ACCOUNTID_FIELD, ACCOUNTNAME_FIELD, OWNERNAME_FIELD]; // NEW: added ACCOUNTID_FIELD
+const FIELDS = [OPPORTUNITYID_FIELD, NAME_FIELD, AMOUNT_FIELD, STAGENAME_FIELD, CLOSEDATE_FIELD, ACCOUNTID_FIELD, 
+                ACCOUNTNAME_FIELD, OWNERNAME_FIELD];
 const RECORDS_PER_PAGE = 10;
 const MAX_PAGE_BUTTONS = 5;
 
@@ -25,13 +27,14 @@ const ROW_ACTIONS = [
 ];
 
 const COLUMNS = [
-    { label: 'Opportunity Name', fieldName: 'Name', editable: true },
+    { label: 'Opportunity Name', fieldName: 'OpportunityUrl', type: 'url', editable: true,
+        typeAttributes: { label: { fieldName: 'Name' }, target: '_self' } },
     { label: 'Amount', fieldName: 'Amount', sortable: true },
     { label: 'Stage', fieldName: 'StageName', type: 'picklist', editable: true,
         typeAttributes: { options: { fieldName: 'stageOptions' } } },
-    { label: 'Close Date', fieldName: 'CloseDate' },
+    { label: 'Close Date', fieldName: 'CloseDate', editable: true, type: 'date-local' },
     { label: 'Account Name', fieldName: 'AccountUrl', type: 'url',
-        typeAttributes: { label: { fieldName: 'AccountName' }, target: '_self'} },
+        typeAttributes: { label: { fieldName: 'AccountName' }, target: '_self' } },
     { label: 'Owner Name', fieldName: 'OwnerName' },
     { type: 'action', typeAttributes: { rowActions: ROW_ACTIONS, menuAlignment: 'auto' } }
 ];
@@ -62,6 +65,7 @@ export default class OpportunityDataTable extends NavigationMixin(LightningEleme
                 this.rows.set(rec.id, {
                     Id: rec.id,
                     Name: rec.fields.Name.value,
+                    OpportunityUrl: `/lightning/r/Opportunity/${rec.id}/view`,
                     Amount: rec.fields.Amount.value,
                     StageName: rec.fields.StageName.value,
                     CloseDate: rec.fields.CloseDate.value,

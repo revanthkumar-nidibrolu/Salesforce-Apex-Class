@@ -1,0 +1,25 @@
+<template>
+    <lightning-modal-header label="Update Account"></lightning-modal-header>
+    <lightning-modal-body>
+        <lightning-record-edit-form
+            record-id={recordId} object-api-name="Account" onsuccess={handleSuccess}>
+            <template for:each={fields} for:item="field">
+                <lightning-input-field key={field} field-name={field}></lightning-input-field>
+            </template>
+        </lightning-record-edit-form>
+    </lightning-modal-body>
+    <lightning-modal-footer>
+        <div class="slds-grid slds-grid_align-center">
+            <template for:each={options} for:item="option">
+                <lightning-button
+                    key={option.id}
+                    label={option.label}
+                    class="slds-button"
+                    variant={option.variant}
+                    onclick={handleOptionClick}
+                    data-id={option.id}>
+                </lightning-button>
+            </template>
+        </div>
+    </lightning-modal-footer>
+</template>
