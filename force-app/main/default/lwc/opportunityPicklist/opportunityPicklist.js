@@ -11,9 +11,7 @@ export default class OpportunityPicklist extends LightningDatatable {
             editTemplate: picklistEdit,
             standardCellLayout: true,
             typeAttributes: ['options']
-        }
-    };
-    static customTypes = {
+        },
         nameLink: {
             template: nameLinkTemplate,
             editTemplate: nameLinkEditTemplate,
