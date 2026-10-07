@@ -27,8 +27,8 @@ const ROW_ACTIONS = [
 ];
 
 const COLUMNS = [
-    { label: 'Opportunity Name', fieldName: 'OpportunityUrl', type: 'url', editable: true,
-        typeAttributes: { label: { fieldName: 'Name' }, target: '_self' } },
+    { label: 'Opportunity Name', fieldName: 'Name', type: 'nameLink', editable: true,
+        typeAttributes: { url: { fieldName: 'OpportunityUrl' } } },
     { label: 'Amount', fieldName: 'Amount', sortable: true },
     { label: 'Stage', fieldName: 'StageName', type: 'picklist', editable: true,
         typeAttributes: { options: { fieldName: 'stageOptions' } } },
