@@ -1,0 +1,18 @@
+<template>
+    <lightning-card title="Navigate to parent account" icon-name="standard:account">
+        <div class="slds-p-horizontal_medium">
+            <lightning-breadcrumbs>
+                <template for:each={crumbs} for:item="crumb">
+                    <lightning-breadcrumb
+                        key={crumb.id}
+                        label={crumb.label}
+                        href="#"
+                        data-id={crumb.id}
+                        data-type={crumb.type}
+                        onclick={handleNavigate}>
+                    </lightning-breadcrumb>
+                </template>
+            </lightning-breadcrumbs>
+        </div>
+    </lightning-card>
+</template>

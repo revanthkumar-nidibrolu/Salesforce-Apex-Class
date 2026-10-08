@@ -1,0 +1,27 @@
+<template>
+    <lightning-card title="Case Navigation" icon-name="standard:case">
+        <div class="slds-p-horizontal_medium">
+            <lightning-combobox
+                label="Select a Case"
+                value={selectedCaseId}
+                options={caseOptions}
+                onchange={handleCaseChange}
+                disabled={noCases}>
+            </lightning-combobox>
+            <div class="slds-m-top_medium">
+                <lightning-breadcrumbs>
+                    <template for:each={crumbs} for:item="crumb">
+                        <lightning-breadcrumb
+                            key={crumb.id}
+                            label={crumb.label}
+                            href="#"
+                            data-id={crumb.id}
+                            data-type={crumb.type}
+                            onclick={handleCrumbClick}>
+                        </lightning-breadcrumb>
+                    </template>
+                </lightning-breadcrumbs>
+            </div>
+        </div>
+    </lightning-card>
+</template>
