@@ -1,0 +1,39 @@
+<template>
+    <lightning-card title="Navigate to parent account" icon-name="standard:account">
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+            <lightning-record-picker
+                label="Select an account"
+                object-api-name="Account"
+                value={currentId}
+                onchange={handleAccountChange}>
+            </lightning-record-picker>
+            <div class="slds-m-top_medium">
+                <lightning-breadcrumbs>
+                    <template for:each={crumbs} for:item="crumb">
+                        <lightning-breadcrumb
+                            key={crumb.id}
+                            label={crumb.label}
+                            href="#"
+                            data-id={crumb.id}
+                            data-type={crumb.type}
+                            onclick={handleCrumbClick}>
+                        </lightning-breadcrumb>
+                    </template>
+                </lightning-breadcrumbs>
+            </div>
+            <template lwc:if={hasAccount}>
+                <div class="slds-p-top_medium">
+                    <lightning-datatable key-field="Id" data={rows} columns={columns} hide-checkbox-column></lightning-datatable>
+                </div>
+                <div class="slds-m-top_small">
+                    <lightning-button
+                        lwc:if={hasParent}
+                        variant="base"
+                        label={parentLabel}
+                        onclick={handleParentClick}>
+                    </lightning-button>
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+</template>
