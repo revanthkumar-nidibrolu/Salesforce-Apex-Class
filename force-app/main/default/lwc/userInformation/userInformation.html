@@ -1,0 +1,12 @@
+<template>
+    <lightning-card title="User Info" icon-name="standard:user">
+        <lightning-record-view-form record-id={userId} object-api-name={objectApiName}>
+            <div class="slds-p-horizontal_medium">
+                <lightning-output-field field-name="Name" variant="label-inline"></lightning-output-field>
+                <lightning-output-field field-name="Email" variant="label-inline"></lightning-output-field>
+                <lightning-output-field field-name="ProfileId" variant="label-inline"></lightning-output-field>
+                <lightning-output-field field-name="ManagerId" variant="label-inline"></lightning-output-field>
+            </div>
+        </lightning-record-view-form>
+    </lightning-card>
+</template>
