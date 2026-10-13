@@ -15,7 +15,7 @@ export default class FlowLauncher extends LightningElement {
             this.showFlow = false;
             showToast(this, 'Success', 'Contact created', 'success');
         } else if(status == 'ERROR') {
-            showToast(this, 'Error', error.bopdy?.message, 'error');
+            showToast(this, 'Error', error.body?.message, 'error');
         }
     }
 }
