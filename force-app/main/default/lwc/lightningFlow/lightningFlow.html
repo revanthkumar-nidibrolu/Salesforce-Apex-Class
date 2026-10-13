@@ -1,0 +1,13 @@
+<template>
+    <lightning-card title="Create Contact" icon-name="standard:contact">
+        <div class="slds-p-around_medium">
+            <template lwc:if={showFlow}>
+                <lightning-flow
+                    flow-api-name="Create_Contact_Flow"
+                    flow-input-variables={inputVariables}
+                    onstatuschange={handleStatusChange}>
+                </lightning-flow>
+            </template>
+        </div>
+    </lightning-card>
+</template>
